@@ -1,0 +1,123 @@
+/* ─── DESIGN TOKENS — DARK (default) ────────────────────────── */
+:root {
+  --bg:        #0a0c10;
+  --surface:   #11141a;
+  --surface2:  #181c24;
+  --border:    #2a2f3d;
+  --accent:    #00e5ff;
+  --accent2:   #ff3d6b;
+  --text:      #d0d8f0;
+  --text-muted:#5a6280;
+  --mono:      'Share Tech Mono', monospace;
+  --sans:      'Zen Kaku Gothic New', sans-serif;
+  --radius:    6px;
+  --transition: 0.18s ease;
+  --scanline:  rgba(0,0,0,0.07);
+}
+
+/* ─── DESIGN TOKENS — LIGHT ──────────────────────────────────── */
+[data-theme="light"] {
+  --bg:        #f0f2f7;
+  --surface:   #ffffff;
+  --surface2:  #e8ebf2;
+  --border:    #c8cfe0;
+  --accent:    #0088bb;
+  --accent2:   #e0174f;
+  --text:      #1a1e2e;
+  --text-muted:#7a82a0;
+  --scanline:  rgba(0,0,0,0.02);
+}
+
+/* ─── THEME TRANSITION ───────────────────────────────────────── */
+body, .sv-app, aside, header, main {
+  transition:
+    background-color 0.35s ease,
+    color            0.35s ease,
+    border-color     0.35s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #app {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+/* scanline overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px, transparent 2px,
+    var(--scanline) 2px, var(--scanline) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ─── RANGE INPUT ───────────────────────────────────────────── */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%; height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(0,229,255,0.5);
+  transition: transform var(--transition);
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+/* ─── CUSTOM CHECKBOX TOGGLE ────────────────────────────────── */
+.sv-switch {
+  position: relative;
+  width: 44px; height: 22px;
+  flex-shrink: 0;
+}
+.sv-switch input { opacity: 0; width: 0; height: 0; }
+.sv-switch-track {
+  position: absolute; inset: 0;
+  background: var(--border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.sv-switch-track::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  transition: transform var(--transition), background var(--transition);
+}
+.sv-switch input:checked + .sv-switch-track {
+  background: rgba(0,229,255,0.25);
+  border: 1px solid var(--accent);
+}
+.sv-switch input:checked + .sv-switch-track::after {
+  transform: translateX(22px);
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(0,229,255,0.6);
+}

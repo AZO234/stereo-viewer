@@ -1,0 +1,352 @@
+<template>
+  <div class="sv-app">
+    <AppHeader
+      :file-name="stereo?.fileName"
+      :dim-info="dimInfo"
+      :is-dark="isDark"
+      @update:is-dark="isDark = $event"
+    />
+
+    <div class="sv-body">
+      <!-- ── SIDEBAR ── -->
+      <aside class="sv-sidebar">
+
+        <!-- File Drop -->
+        <section>
+          <PanelTitle>ファイル</PanelTitle>
+          <DropZone @file="onFile" />
+          <div v-if="error" class="sv-error mt-2">
+            <i class="bi bi-exclamation-triangle me-1" />{{ error }}
+          </div>
+        </section>
+
+        <!-- Mode Tabs -->
+        <section>
+          <PanelTitle>表示モード</PanelTitle>
+          <div class="mode-tabs">
+            <button
+              class="mode-tab"
+              :class="{ active: mode === 'anim' }"
+              @click="setMode('anim')"
+            >アニメ式</button>
+            <button
+              class="mode-tab"
+              :class="{ active: mode === 'fixed' }"
+              @click="setMode('fixed')"
+            >固定式</button>
+          </div>
+        </section>
+
+        <!-- Anim Controls -->
+        <section v-show="mode === 'anim'">
+          <PanelTitle>アニメ設定</PanelTitle>
+          <div class="ctrl-group">
+            <SliderRow
+              label="切替速度"
+              v-model="animSpeed"
+              :min="50" :max="2000" :step="50"
+              :display-value="`${animSpeed} ms`"
+            />
+            <SliderRow
+              label="画像サイズ"
+              v-model="animScalePct"
+              :min="20" :max="200" :step="5"
+              :display-value="`${animScalePct} %`"
+            />
+            <button
+              class="sv-play-btn"
+              :class="{ playing: animPlaying }"
+              :disabled="!stereo"
+              @click="togglePlay"
+            >
+              <span class="dot" />
+              <span>{{ animPlaying ? '停止' : '再生' }}</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Fixed Controls -->
+        <section v-show="mode === 'fixed'">
+          <PanelTitle>固定式設定</PanelTitle>
+          <div class="ctrl-group">
+            <SliderRow
+              label="画像サイズ"
+              v-model="fixedScalePct"
+              :min="20" :max="200" :step="5"
+              :display-value="`${fixedScalePct} %`"
+            />
+            <ToggleRow label="左右入れ替え" v-model="swapped" />
+          </div>
+        </section>
+
+      </aside>
+
+      <!-- ── MAIN ── -->
+      <main class="sv-main">
+
+        <!-- Empty state -->
+        <div v-if="!stereo && !loading" class="empty-state">
+          <div class="empty-icon">🎞️</div>
+          <p>JPS / PNS ファイルを読み込んでください</p>
+          <p class="empty-sub">サイドバイサイド形式の立体画像に対応</p>
+        </div>
+
+        <!-- Loading -->
+        <div v-else-if="loading" class="empty-state">
+          <div class="sv-spinner" />
+          <p>読み込み中...</p>
+        </div>
+
+        <!-- Viewers -->
+        <template v-else-if="stereo">
+          <AnimViewer
+            v-show="mode === 'anim'"
+            ref="animViewerRef"
+            :stereo="stereo"
+            :speed="animSpeed"
+            :scale="animScale"
+            v-model:playing="animPlaying"
+            @frame="currentFrame = $event"
+          />
+          <FixedViewer
+            v-show="mode === 'fixed'"
+            :stereo="stereo"
+            :scale="fixedScale"
+            :swapped="swapped"
+          />
+        </template>
+
+        <!-- Status bar -->
+        <StatusBar
+          :size="dimInfo ?? '—'"
+          :mode="mode === 'anim' ? 'ANIM' : 'FIXED'"
+          :frame="mode === 'anim' ? (currentFrame === 'left' ? 'L' : 'R') : '—'"
+          :scale="mode === 'anim' ? `${animScalePct}%` : `${fixedScalePct}%`"
+          :layout="stereo ? (stereo.layout === 'side-by-side' ? 'SBS' : 'O/U') : undefined"
+        />
+      </main>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import type { ViewMode } from './types'
+import { useStereoLoader } from './composables/useStereoLoader'
+
+import AppHeader   from './components/AppHeader.vue'
+import DropZone    from './components/DropZone.vue'
+import PanelTitle  from './components/PanelTitle.vue'
+import SliderRow   from './components/SliderRow.vue'
+import ToggleRow   from './components/ToggleRow.vue'
+import AnimViewer  from './components/AnimViewer.vue'
+import FixedViewer from './components/FixedViewer.vue'
+import StatusBar   from './components/StatusBar.vue'
+
+// ── Theme ─────────────────────────────────────────────────────
+const isDark = ref(true)
+watch(isDark, (dark) => {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+}, { immediate: true })
+
+// ── Stereo loader ────────────────────────────────────────────
+const { stereo, loading, error, loadFile } = useStereoLoader()
+
+// ── Mode ─────────────────────────────────────────────────────
+const mode = ref<ViewMode>('anim')
+
+function setMode(m: ViewMode) {
+  if (animPlaying.value) animPlaying.value = false
+  mode.value = m
+}
+
+// ── Anim controls ─────────────────────────────────────────────
+const animSpeed    = ref(100)          // ms
+const animScalePct = ref(100)          // %
+const animScale    = computed(() => animScalePct.value / 100)
+const animPlaying  = ref(false)
+const currentFrame = ref<string>('left')
+const animViewerRef = ref<InstanceType<typeof AnimViewer> | null>(null)
+
+function togglePlay() {
+  animPlaying.value = !animPlaying.value
+}
+
+// ── Fixed controls ────────────────────────────────────────────
+const fixedScalePct = ref(100)
+const fixedScale    = computed(() => fixedScalePct.value / 100)
+const swapped       = ref(false)
+
+// ── File handler ──────────────────────────────────────────────
+async function onFile(file: File) {
+  animPlaying.value = false
+  await loadFile(file)
+}
+
+// ── Derived info ──────────────────────────────────────────────
+const dimInfo = computed(() => {
+  if (!stereo.value) return undefined
+  const { originalSize: o, halfWidth: hw, height: h, layout } = stereo.value
+  return layout === 'side-by-side'
+    ? `SBS ${o.w}×${o.h} (${hw}×${h} → ${o.w}×${o.h})`
+    : `O/U ${o.w}×${o.h} (${hw}×${Math.floor(o.h/2)} → ${o.w}×${o.h})`
+})
+</script>
+
+<style scoped>
+/* ── APP SHELL ───────────────────────────────────────── */
+.sv-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sv-body {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sv-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+/* ── MODE TABS ───────────────────────────────────────── */
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.mode-tab {
+  padding: 0.55rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.mode-tab.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+}
+.mode-tab:not(.active):hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+/* ── CTRL GROUP ──────────────────────────────────────── */
+.ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* ── PLAY BUTTON ─────────────────────────────────────── */
+.sv-play-btn {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background var(--transition), color var(--transition);
+}
+.sv-play-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.sv-play-btn:not(:disabled):hover,
+.sv-play-btn.playing {
+  background: var(--accent);
+  color: #000;
+}
+.dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.sv-play-btn.playing .dot {
+  animation: blink 0.8s infinite;
+}
+@keyframes blink {
+  0%,100% { opacity:1 } 50% { opacity:0.15 }
+}
+
+/* ── MAIN ────────────────────────────────────────────── */
+.sv-main {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1.5rem 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── EMPTY STATE ─────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.empty-icon { font-size: 4rem; opacity: 0.18; }
+.empty-state p {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+.empty-sub { opacity: 0.45; font-size: 0.65rem !important; }
+
+/* ── SPINNER ─────────────────────────────────────────── */
+.sv-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── ERROR ───────────────────────────────────────────── */
+.sv-error {
+  font-size: 0.72rem;
+  color: var(--accent2);
+  background: rgba(255,61,107,0.08);
+  border: 1px solid rgba(255,61,107,0.3);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.6rem;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 700px) {
+  .sv-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .sv-sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+</style>

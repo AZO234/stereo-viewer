@@ -1,0 +1,60 @@
+# GitLab Pages デプロイ CI
+# 公開 URL: https://<GROUP>.gitlab.io/<PROJECT>/
+#
+# 初回設定:
+#   Settings → Pages が有効になっていることを確認
+#   (GitLab.com は自動的に有効)
+
+image: node:20-alpine
+
+# キャッシュ設定（node_modules を再利用して高速化）
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+
+stages:
+  - build
+  - deploy
+
+# ──────────────────────────────────────────
+# 1. ビルド
+# ──────────────────────────────────────────
+build:
+  stage: build
+  script:
+    - npm ci
+    - npm run build
+  variables:
+    # GitLab Pages の公開 URL は
+    # https://<GROUP>.gitlab.io/<PROJECT>/ となるため
+    # プロジェクトパスを base として渡す
+    VITE_BASE_PATH: "/${CI_PROJECT_PATH#*/}/"
+  artifacts:
+    # deploy ジョブへ dist/ を引き渡す
+    paths:
+      - dist/
+    expire_in: 1 hour
+  # main / master ブランチへの push 時のみ実行
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"
+
+# ──────────────────────────────────────────
+# 2. GitLab Pages デプロイ
+# ──────────────────────────────────────────
+# ジョブ名は必ず "pages" にすること（GitLab の規約）
+pages:
+  stage: deploy
+  script:
+    # GitLab Pages は public/ ディレクトリを公開する
+    - mv dist public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master"
+  environment:
+    name: production
+    url: https://$CI_PAGES_DOMAIN/$CI_PROJECT_PATH
