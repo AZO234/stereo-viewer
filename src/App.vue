@@ -193,7 +193,7 @@ const stretchHint = computed(() => {
 const { autoScale } = useAutoScale(mainEl, stereo, stretchMode, mode)
 
 // ── Anim controls ─────────────────────────────────────────────
-const animSpeed    = ref(100)
+const animSpeed    = ref(500)
 const animScalePct = ref(100)
 // 自動スケール × 手動スケールを合成
 const finalAnimScale  = computed(() => autoScale.value * animScalePct.value / 100)
