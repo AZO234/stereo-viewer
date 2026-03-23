@@ -15,7 +15,11 @@
       @change="onChange"
     />
     <div class="drop-icon">📂</div>
-    <p class="drop-hint">クリックまたはドロップ</p>
+    <!-- スマホではドラッグ&ドロップ非対応のため文言を変える -->
+    <p class="drop-hint">
+      <span class="no-touch">クリックまたはドロップ</span>
+      <span class="touch-only">タップして選択</span>
+    </p>
     <div class="ext-row">
       <span class="ext-badge">.jps</span>
       <span class="ext-badge">.pns</span>
@@ -28,7 +32,7 @@
 import { ref } from 'vue'
 
 const emit = defineEmits<{ file: [f: File] }>()
-const inputEl   = ref<HTMLInputElement | null>(null)
+const inputEl    = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 
 function onChange(e: Event) {
@@ -58,6 +62,16 @@ function onDrop(e: DragEvent) {
 }
 .drop-icon { font-size: 2rem; opacity: 0.5; margin-bottom: 0.4rem; }
 .drop-hint { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+
+/* デフォルト：通常表示（PC） */
+.touch-only { display: none; }
+.no-touch   { display: inline; }
+
+/* 768px以下：タッチ向け文言に切り替え */
+@media (max-width: 768px) {
+  .touch-only { display: inline; }
+  .no-touch   { display: none; }
+}
 
 .ext-row { display: flex; justify-content: center; gap: 0.3rem; flex-wrap: wrap; }
 .ext-badge {

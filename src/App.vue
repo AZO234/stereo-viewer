@@ -8,7 +8,51 @@
     />
 
     <div class="sv-body">
-      <!-- ── SIDEBAR ── -->
+      <!-- ── MAIN（左：画像ビューア） ── -->
+      <main class="sv-main">
+
+        <div v-if="!stereo && !loading" class="empty-state">
+          <div class="empty-icon">🎞️</div>
+          <p>JPS / PNS ファイルを読み込んでください</p>
+          <p class="empty-sub">サイドバイサイド形式の立体画像に対応</p>
+        </div>
+
+        <div v-else-if="loading" class="empty-state">
+          <div class="sv-spinner" />
+          <p>読み込み中...</p>
+        </div>
+
+        <template v-else-if="stereo">
+          <AnimViewer
+            v-show="mode === 'anim'"
+            ref="animViewerRef"
+            :stereo="stereo"
+            :speed="animSpeed"
+            :scale="animScale"
+            :stretch="stretchMode"
+            v-model:playing="animPlaying"
+            @frame="currentFrame = $event"
+          />
+          <FixedViewer
+            v-show="mode === 'fixed'"
+            :stereo="stereo"
+            :scale="fixedScale"
+            :stretch="stretchMode"
+            :swapped="swapped"
+          />
+        </template>
+
+        <StatusBar
+          :size="dimInfo ?? '—'"
+          :mode="mode === 'anim' ? 'ANIM' : 'FIXED'"
+          :frame="mode === 'anim' ? (currentFrame === 'left' ? 'L' : 'R') : '—'"
+          :scale="mode === 'anim' ? `${animScalePct}%` : `${fixedScalePct}%`"
+          :layout="stereo ? (stereo.layout === 'side-by-side' ? 'SBS' : 'O/U') : undefined"
+          :stretch="stretchMode"
+        />
+      </main>
+
+      <!-- ── SIDEBAR（右：UI） ── -->
       <aside class="sv-sidebar">
 
         <!-- File Drop -->
@@ -79,50 +123,6 @@
         </section>
 
       </aside>
-
-      <!-- ── MAIN ── -->
-      <main class="sv-main">
-
-        <div v-if="!stereo && !loading" class="empty-state">
-          <div class="empty-icon">🎞️</div>
-          <p>JPS / PNS ファイルを読み込んでください</p>
-          <p class="empty-sub">サイドバイサイド形式の立体画像に対応</p>
-        </div>
-
-        <div v-else-if="loading" class="empty-state">
-          <div class="sv-spinner" />
-          <p>読み込み中...</p>
-        </div>
-
-        <template v-else-if="stereo">
-          <AnimViewer
-            v-show="mode === 'anim'"
-            ref="animViewerRef"
-            :stereo="stereo"
-            :speed="animSpeed"
-            :scale="animScale"
-            :stretch="stretchMode"
-            v-model:playing="animPlaying"
-            @frame="currentFrame = $event"
-          />
-          <FixedViewer
-            v-show="mode === 'fixed'"
-            :stereo="stereo"
-            :scale="fixedScale"
-            :stretch="stretchMode"
-            :swapped="swapped"
-          />
-        </template>
-
-        <StatusBar
-          :size="dimInfo ?? '—'"
-          :mode="mode === 'anim' ? 'ANIM' : 'FIXED'"
-          :frame="mode === 'anim' ? (currentFrame === 'left' ? 'L' : 'R') : '—'"
-          :scale="mode === 'anim' ? `${animScalePct}%` : `${fixedScalePct}%`"
-          :layout="stereo ? (stereo.layout === 'side-by-side' ? 'SBS' : 'O/U') : undefined"
-          :stretch="stretchMode"
-        />
-      </main>
     </div>
   </div>
 </template>
@@ -207,11 +207,11 @@ const dimInfo = computed(() => {
 
 <style scoped>
 .sv-app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-.sv-body { display: grid; grid-template-columns: 290px 1fr; flex: 1; overflow: hidden; }
+.sv-body { display: grid; grid-template-columns: 1fr 290px; flex: 1; overflow: hidden; }
 
 .sv-sidebar {
   background: var(--surface);
-  border-right: 1px solid var(--border);
+  border-left: 1px solid var(--border);
   padding: 1.25rem 1rem;
   display: flex;
   flex-direction: column;
@@ -266,8 +266,9 @@ const dimInfo = computed(() => {
 
 .sv-error { font-size: 0.72rem; color: var(--accent2); background: rgba(255,61,107,0.08); border: 1px solid rgba(255,61,107,0.3); border-radius: var(--radius); padding: 0.4rem 0.6rem; }
 
-@media (max-width: 700px) {
-  .sv-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .sv-sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+@media (max-width: 768px) {
+  .sv-body { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  .sv-sidebar { border-left: none; border-top: 1px solid var(--border); order: 2; }
+  .sv-main { order: 1; }
 }
 </style>
