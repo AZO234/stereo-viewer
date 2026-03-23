@@ -68,6 +68,12 @@
           </div>
         </section>
 
+        <!-- 分割方法 -->
+        <section>
+          <PanelTitle>分割方法</PanelTitle>
+          <LayoutToggle v-model="splitLayout" :disabled="!stereo" />
+        </section>
+
         <!-- Mode Tabs -->
         <section>
           <PanelTitle>表示モード</PanelTitle>
@@ -133,7 +139,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import type { ViewMode, StretchMode } from './types'
+import type { ViewMode, StretchMode, StereoLayout } from './types'
 import { useAutoScale } from './composables/useAutoScale'
 import type { FontSize } from './components/FontSizeToggle.vue'
 import { useStereoLoader } from './composables/useStereoLoader'
@@ -143,7 +149,8 @@ import DropZone      from './components/DropZone.vue'
 import PanelTitle    from './components/PanelTitle.vue'
 import SliderRow     from './components/SliderRow.vue'
 import ToggleRow     from './components/ToggleRow.vue'
-import StretchToggle from './components/StretchToggle.vue'
+import StretchToggle   from './components/StretchToggle.vue'
+import LayoutToggle    from './components/LayoutToggle.vue'
 import AnimViewer    from './components/AnimViewer.vue'
 import FixedViewer   from './components/FixedViewer.vue'
 import StatusBar     from './components/StatusBar.vue'
@@ -164,7 +171,20 @@ watch(fontSize, (s) => {
 }, { immediate: true })
 
 // ── Stereo loader ─────────────────────────────────────────────
-const { stereo, loading, error, loadFile } = useStereoLoader()
+const { stereo, loading, error, loadFile, relayout } = useStereoLoader()
+
+// ── Split layout ─────────────────────────────────────────────
+const splitLayout = ref<StereoLayout>('side-by-side')
+
+// 画像ロード時に自動判定結果を反映
+watch(stereo, (s) => {
+  if (s) splitLayout.value = s.layout
+})
+
+// ユーザーが切り替えたら即再分割
+watch(splitLayout, (layout) => {
+  if (stereo.value) relayout(layout)
+})
 
 // ── Mode ──────────────────────────────────────────────────────
 const mode = ref<ViewMode>('anim')

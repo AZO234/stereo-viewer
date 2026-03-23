@@ -22,6 +22,8 @@ export interface StereoImage {
   defaultStretch: StretchMode
   fileName: string
   originalSize: { w: number; h: number }
+  /** 元画像全体（再分割用） */
+  rawCanvas: HTMLCanvasElement
   /** 分割方向（横並び or 縦並び） */
   layout: StereoLayout
 }
