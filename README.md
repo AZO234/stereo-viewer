@@ -4,9 +4,9 @@
 
 # STEREO VIEWER
 
-[![Deploy to GitHub Pages](https://github.com/AZO234/stereo-viewer/actions/workflows/deploy.yml/badge.svg)](https://github.com/AZO234/stereo-viewer/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/AZO234/sbs-stereo-viewer/actions/workflows/deploy.yml/badge.svg)](https://github.com/AZO234/sbs-stereo-viewer/actions/workflows/deploy.yml)
 
-**[🔗 Live Demo](https://azo234.github.io/stereo-viewer/)**
+**[🔗 Live Demo](https://azo234.github.io/sbs-stereo-viewer/)**
 
 A web viewer for stereoscopic images (JPS/PNS) — Vue 3 + TypeScript + Bootstrap 5.
 

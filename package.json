@@ -1,5 +1,5 @@
 {
-  "name": "stereo-viewer",
+  "name": "sbs-stereo-viewer",
   "version": "1.0.0",
   "description": "JPS/PNS Stereoscopic Image Viewer — Vue 3 + TypeScript + Bootstrap",
   "scripts": {

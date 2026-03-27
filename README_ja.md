@@ -4,9 +4,9 @@
 
 # STEREO VIEWER
 
-[![Deploy to GitHub Pages](https://github.com/AZO234/stereo-viewer/actions/workflows/deploy.yml/badge.svg)](https://github.com/AZO234/stereo-viewer/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/AZO234/sbs-stereo-viewer/actions/workflows/deploy.yml/badge.svg)](https://github.com/AZO234/sbs-stereo-viewer/actions/workflows/deploy.yml)
 
-**[🔗 デモページ](https://azo234.github.io/stereo-viewer/)**
+**[🔗 デモページ](https://azo234.github.io/sbs-stereo-viewer/)**
 
 立体画像（JPS/PNS）の擬似閲覧ウェブビューアです。Vue 3 + TypeScript + Bootstrap 5 で作られています。
 
