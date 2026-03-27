@@ -36,9 +36,9 @@ export default defineConfig({
         ],
       },
       manifest: {
-        name: 'STEREO VIEWER',
-        short_name: 'StereoViewer',
-        description: 'JPS/PNS立体画像ビューア',
+        name: 'SBS STEREO VIEWER',
+        short_name: 'SbsStereoViewer',
+        description: 'SBS(.jps/.pns)立体画像ビューア',
         theme_color: '#00e5ff',
         background_color: '#0a0c10',
         display: 'standalone',
