@@ -10,6 +10,9 @@
       @update:font-size="fontSize = $event"
       @update:locale="setLocale($event)"
     />
+    <!-- ヘルプモーダル -->
+    <HelpModal v-if="showHelp" @close="showHelp = false" />
+
     <!-- 右下固定の著作権表示 -->
     <div class="sv-copyright">
       <a href="https://domisan.sakura.ne.jp/" target="_blank" class="sv-copyright__banner">
@@ -122,6 +125,9 @@
               <span class="dot" />
               <span>{{ animPlaying ? t.stop : t.play }}</span>
             </button>
+            <button class="sv-help-btn" @click="showHelp = true">
+              <i class="bi bi-question-circle me-1" />{{ t.helpBtn }}
+            </button>
           </div>
         </section>
 
@@ -162,6 +168,7 @@ import LayoutToggle    from './components/LayoutToggle.vue'
 import AnimViewer    from './components/AnimViewer.vue'
 import FixedViewer   from './components/FixedViewer.vue'
 import StatusBar     from './components/StatusBar.vue'
+import HelpModal from './components/HelpModal.vue'
 
 // ── i18n ─────────────────────────────────────────────────────
 const { locale, t, setLocale, initLocale } = useI18n()
@@ -184,6 +191,9 @@ watch(fontSize, (s) => {
 
 // ── Stereo loader ─────────────────────────────────────────────
 const { stereo, loading, error, loadFile, relayout } = useStereoLoader()
+
+// ── Help modal ──────────────────────────────────────────────
+const showHelp = ref(false)
 
 // ── Split layout ─────────────────────────────────────────────
 const splitLayout = ref<StereoLayout>('side-by-side')
@@ -342,6 +352,25 @@ const dimInfo = computed(() => {
 }
 .sv-copyright__text {
   pointer-events: none;
+}
+
+.sv-help-btn {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+.sv-help-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0,229,255,0.05);
 }
 
 @media (max-width: 768px) {

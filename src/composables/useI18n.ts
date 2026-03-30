@@ -73,6 +73,14 @@ const messages = {
     fontSizeLabel: (s: string) => `文字サイズ${s}`,
 
     // 眼ラベル
+    // ヘルプモーダル
+    helpTitle:    'HOW TO USE',
+    helpSrcLabel: 'SOURCE IMAGE (SBS)',
+    helpSrcHint:  'サイドバイサイド形式の元画像です。スライダーで左眼（L）と右眼（R）を比較できます。',
+    helpGifLabel: 'GENERATED ANIMATION',
+    helpGifHint:  'このビューアで生成したクロスフェードアニメです（GIF）。',
+    helpBtn:      '使い方',
+
     leftLabel:    'LEFT',
     rightLabel:   'RIGHT',
     leftSwapped:  'RIGHT → LEFT',
@@ -133,6 +141,14 @@ const messages = {
     fontMd: 'M',
     fontLg: 'L',
     fontSizeLabel: (s: string) => `Font size ${s}`,
+
+    // Help modal
+    helpTitle:    'HOW TO USE',
+    helpSrcLabel: 'SOURCE IMAGE (SBS)',
+    helpSrcHint:  'Side-by-side stereo image. Drag the slider to compare Left (L) and Right (R) eyes.',
+    helpGifLabel: 'GENERATED ANIMATION',
+    helpGifHint:  'Crossfade animation exported from this viewer (GIF).',
+    helpBtn:      'How to use',
 
     leftLabel:    'LEFT',
     rightLabel:   'RIGHT',
