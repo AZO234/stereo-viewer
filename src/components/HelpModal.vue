@@ -12,18 +12,13 @@
         <!-- ソース画像スライダー -->
         <section class="hm-section">
           <p class="hm-label">{{ t.helpSrcLabel }}</p>
-          <div class="hm-slider-wrap" @mousemove="onMove" @touchmove.prevent="onTouch" ref="sliderEl">
+          <div class="hm-slider-wrap">
             <!-- 右眼（ベース） -->
             <img class="hm-img hm-img--right" :src="srcRight" draggable="false" />
-            <!-- 左眼（クリップして上に重ねる） -->
+            <!-- 左眼（左半分を表示） -->
             <img class="hm-img hm-img--left"  :src="srcLeft"
-              :style="{ clipPath: `inset(0 ${100 - sliderPct}% 0 0)` }"
+              style="clip-path: inset(0 50% 0 0)"
               draggable="false" />
-            <!-- ハンドル -->
-            <div class="hm-handle" :style="{ left: sliderPct + '%' }">
-              <div class="hm-handle__line" />
-              <div class="hm-handle__knob">⇔</div>
-            </div>
             <!-- 眼ラベル -->
             <span class="hm-eye hm-eye--l">L</span>
             <span class="hm-eye hm-eye--r">R</span>
@@ -46,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useI18n } from '../composables/useI18n'
 
 const { t } = useI18n()
@@ -61,20 +56,6 @@ const emit = defineEmits<{ close: [] }>()
 const base     = import.meta.env.BASE_URL
 const srcLeft  = base + 'demo-source.jpg'
 const srcRight = base + 'demo-source.jpg'
-
-// ── スライダー ────────────────────────────────────────────
-const sliderPct = ref(50)
-const sliderEl  = ref<HTMLDivElement | null>(null)
-
-function setPct(clientX: number) {
-  if (!sliderEl.value) return
-  const rect = sliderEl.value.getBoundingClientRect()
-  const pct  = Math.max(0, Math.min(100, (clientX - rect.left) / rect.width * 100))
-  sliderPct.value = pct
-}
-
-function onMove(e: MouseEvent)  { if (e.buttons === 1) setPct(e.clientX) }
-function onTouch(e: TouchEvent) { setPct(e.touches[0].clientX) }
 
 // ESC で閉じる
 onMounted(() => {
@@ -161,8 +142,6 @@ onMounted(() => {
   overflow: hidden;
   border-radius: 4px;
   border: 1px solid var(--border);
-  cursor: col-resize;
-  user-select: none;
   background: #000;
 }
 
@@ -178,35 +157,6 @@ onMounted(() => {
 .hm-img--left  { object-position: left center; }
 /* R眼: 元画像の右半分を表示 */
 .hm-img--right { object-position: right center; }
-
-/* ハンドル */
-.hm-handle {
-  position: absolute;
-  top: 0; bottom: 0;
-  transform: translateX(-50%);
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.hm-handle__line {
-  width: 2px;
-  flex: 1;
-  background: rgba(255,255,255,0.7);
-  box-shadow: 0 0 6px rgba(0,0,0,0.5);
-}
-.hm-handle__knob {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  font-size: 0.75rem;
-  padding: 0.2rem 0.35rem;
-  border-radius: 4px;
-  border: 1px solid rgba(255,255,255,0.3);
-  white-space: nowrap;
-}
 
 /* 眼ラベル */
 .hm-eye {
