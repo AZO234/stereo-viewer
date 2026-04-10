@@ -35,7 +35,7 @@
         <section class="hm-section">
           <p class="hm-label">{{ t.helpGifLabel }}</p>
           <div class="hm-gif-wrap">
-            <img class="hm-gif" src="/demo-generated.gif" alt="Generated animation" />
+            <img class="hm-gif" :src="base + 'demo-generated.gif'" alt="Generated animation" />
           </div>
           <p class="hm-hint">{{ t.helpGifHint }}</p>
         </section>
@@ -58,8 +58,9 @@ const emit = defineEmits<{ close: [] }>()
 
 // object-fit:cover + clip の代わりに
 // 2枚の <img> を同じ src で表示し、object-position で左右を出し分ける
-const srcLeft  = '/demo-source.jpg'
-const srcRight = '/demo-source.jpg'
+const base     = import.meta.env.BASE_URL
+const srcLeft  = base + 'demo-source.jpg'
+const srcRight = base + 'demo-source.jpg'
 
 // ── スライダー ────────────────────────────────────────────
 const sliderPct = ref(50)
